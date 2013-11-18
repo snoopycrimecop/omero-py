@@ -20,17 +20,33 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 """
-   Tests for the integration library.
+   gateway tests - Testing the gateway image wrapper
+
+   pytest fixtures used as defined in conftest.py:
+   - gatewaywrapper
+
 """
 
-import test.integration.library as lib
-import omero
+import pytest
 
-class TestLibrary(lib.ITest):
+# Module level marker
+pytestmark = pytest.mark.fs_suite
 
-   def test9188(self):
-        self.createTestImage(10,10,1,1,1)
-        self.createTestImage(10,10,10,1,1)
-        self.createTestImage(10,10,1,10,1)
-        self.createTestImage(10,10,1,1,10)
-   
+class TestFileset(object):
+
+    @pytest.fixture(autouse=True)
+    def setUp(self, gatewaywrapper):
+        gatewaywrapper.loginAsAuthor()
+        self.TESTIMG = gatewaywrapper.getTestImage()
+
+    @pytest.mark.xfail(reason="ticket 11610")
+    def testFileset(self):
+        image = self.TESTIMG
+
+        # Assume image is not imported pre-FS
+        filesCount = image.countFilesetFiles()
+        assert filesCount > 0, "Imported image should be linked to original files"
+
+        # List the 'imported image files' (from fileset), check the number
+        filesInFileset = list(image.getImportedImageFiles())
+        assert filesCount == len(filesInFileset)
