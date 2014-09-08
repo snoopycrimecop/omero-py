@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (C) 2013-2014 University of Dundee & Open Microscopy Environment.
+# Copyright (C) 2014 University of Dundee & Open Microscopy Environment.
 # All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,17 +19,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-   Tests for the integration library.
-"""
+import pytest
+from omero.plugins.group import GroupControl
+from omero.cli import CLI
 
-import test.integration.library as lib
+subcommands = ['add', 'perms', 'list', 'copyusers', 'adduser', 'removeuser']
 
 
-class TestLibrary(lib.ITest):
+class TestGroup(object):
 
-    def test9188(self):
-        self.createTestImage(10, 10, 1, 1, 1)
-        self.createTestImage(10, 10, 10, 1, 1)
-        self.createTestImage(10, 10, 1, 10, 1)
-        self.createTestImage(10, 10, 1, 1, 10)
+    def setup_method(self, method):
+        self.cli = CLI()
+        self.cli.register("group", GroupControl, "TEST")
+        self.args = ["group"]
+
+    def testHelp(self):
+        self.args += ["-h"]
+        self.cli.invoke(self.args, strict=True)
+
+    @pytest.mark.parametrize("subcommand", subcommands)
+    def testSubcommandHelp(self, subcommand):
+        self.args += [subcommand, "-h"]
+        self.cli.invoke(self.args, strict=True)

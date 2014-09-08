@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (C) 2013-2014 University of Dundee & Open Microscopy Environment.
+# Copyright (C) 2014 University of Dundee & Open Microscopy Environment.
 # All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,17 +19,26 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-   Tests for the integration library.
-"""
-
-import test.integration.library as lib
+import pytest
+from omero.plugins.download import DownloadControl
+from omero.cli import CLI, NonZeroReturnCode
 
 
-class TestLibrary(lib.ITest):
+class TestDownload(object):
 
-    def test9188(self):
-        self.createTestImage(10, 10, 1, 1, 1)
-        self.createTestImage(10, 10, 10, 1, 1)
-        self.createTestImage(10, 10, 1, 10, 1)
-        self.createTestImage(10, 10, 1, 1, 10)
+    def setup_method(self, method):
+        self.cli = CLI()
+        self.cli.register("download", DownloadControl, "TEST")
+        self.args = ["download"]
+
+    def testHelp(self):
+        self.args += ["-h"]
+        self.cli.invoke(self.args, strict=True)
+
+    @pytest.mark.parametrize(
+        'bad_input',
+        ['-1', 'OriginalFile:-1', 'FileAnnotation:-1', 'Image:-1'])
+    def testInvalidInput(self, bad_input):
+        self.args += [bad_input, '-']
+        with pytest.raises(NonZeroReturnCode):
+            self.cli.invoke(self.args, strict=True)
