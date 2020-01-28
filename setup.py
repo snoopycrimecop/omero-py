@@ -213,6 +213,31 @@ setup(
         'Pillow',
         'zeroc-ice>=3.6.4,<3.7',
     ],
+    extras_require={
+        'extra': [
+            # 'ipython',
+            'Jinja2',
+            'numexpr',
+            'numpy',
+            'Pillow',
+            'PyYAML',
+            'tables',
+        ],
+        'linux': [
+            # These match the currently available binary wheels and should
+            # ensure omero-py can be installed without a compiler
+            # 'ipython==7.9.0',
+            'Jinja2==2.10.3',
+            'numexpr==2.7.0',
+            'numpy==1.17.3',
+            'Pillow==6.2.1',
+            'PyYAML==5.1.2',
+            'tables==3.6.1',
+        ],
+        'testlib': [
+            'mox3',
+        ],
+    },
     tests_require=[
         'pytest',
         'mox3',
